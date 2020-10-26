@@ -27,7 +27,7 @@ In particular, the dataset preparation, ISA model learning and code instruction 
 
 Below is a table of the various datasets used in the thesis artefact. These are referenced in the steps below.
 
-![Thesis artefact datasets](/img/artefact_stages.png)
+![Thesis artefact datasets](/img/DataSetsTable.png)
 
 
 ## Thesis artefact validation
