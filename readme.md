@@ -2,7 +2,7 @@
 
 ## Background
 
-This git repository contains the code and data files for my master's thesis titled "ARCHITECTURE-INDEPENDENT MATCHING OF STRIPPED BINARY CODE FILES USING BERT AND A SIAMESE NEURAL NETWORK" from the University of Jyväskylä.
+This git repository contains the code and data files for the artefact of my master's thesis titled "ARCHITECTURE-INDEPENDENT MATCHING OF STRIPPED BINARY CODE FILES USING BERT AND A SIAMESE NEURAL NETWORK" from the University of Jyväskylä.
 
 ## Prerequisites
 
@@ -12,29 +12,33 @@ The scripts included in this repository require the installation of the followin
 - Keras (https://keras.io)
 - Tensorflow (https://www.tensorflow.org)
 
-In particular, Dataset preparation, ISA model learning and Code instruction embeddings require an understanding of how to use the BERT code. It is highly reccommended that you familiarize yourself with the README file at https://github.com/google-research/bert/blob/master/README.md.
+These scripts were tested to run on a Windows 10 installation with tensorflow-gpu version 2.0.0 and Keras version 2.3.1. 
+
+
+## Thesis artefact
+
+The thesis artefact consists of four different stages  as noted in the image below.
+
+![Thesis artefact stages](/img/artefact_stages.png)
+
+In particular, the dataset preparation, ISA model learning and code instruction embeddings stages require an understanding of how to use the BERT code. It is highly recommended that you familiarize yourself with the README file at https://github.com/google-research/bert/blob/master/README.md before proceeding with the scripts in this repository.
 
 ## Overview of thesis datasets
 
 Below is a table of the various datasets used in the thesis artefact. These are referenced in the steps below.
 
-Data Set	Derived From	                    Format	            Type	Count	Match 	Used For
-1	        Debian repositories	                code sections	    armhf	\~3700	NA	    Pre-training
-2	        Raspbian repositories	            code sections	    rasp	\~300	NA	    Fine tuning
-3	        Data set 1	                        code sections	    armhf	300	    Yes	    creating other data sets
-4	        Data set 2	                        code sections	    rasp	300	    Yes	    creating other data sets
-5	        Data set 3	                        embedding files	    armhf	253	    Yes	    Siamese network training
-6	        Data Set 4	                        embedding files	    rasp	253	    Yes	    Siamese network training
-7	        Raspbian repositories	            embedding files	    rasp	297	    No	    Siamese network training
-8	        Data set 3	                        embedding files	    armhf	20	    Yes	    Siamese network validation
-9	        Data set 4	                        embedding files	    rasp	20	    Yes	    Siamese network validation
-10	        Raspbian repositories	            embedding files	    rasp	40	    No	    Siamese network validation
-11	        Data sets 3 & 8	                    code sections	    armhf	20	    Yes	    SSDEEP & SDHASH testing
-12	        Data sets 4 & 9	                    code sections	    rasp	20	    Yes	    SSDEEP & SDHASH testing
-13	        Raspbian repositories & Data set 10	code sections	    rasp	40      No	    SSDEEP & SDHASH testing
+![Thesis artefact datasets](/img/artefact_stages.png)
 
 
-## Dataset preparation
+## Thesis artefact validation
+
+If you want to quickly validate the similarity detection portion of the artefact, please focus on the ‘Similarity detection: Test’ and ‘Fuzzy hashing comparison’ sections below. These sections contain commands and associated screen shots of the output.
+
+
+
+## Thesis stages
+
+### Dataset preparation
 
 In the folder 1\_dataset\_preparation, you will find the following:
 
@@ -72,7 +76,7 @@ python C:\Users\Kenneth\Documents\GitHub\bert\create\_pretraining\_data.py ^
 
 For more information on create\_pretraining\_data.py, please consult the BERT documentation.
 
-## ISA model learning
+### ISA model learning
 
 In the folder 2\_ISA\_model\_learning, you will find:
 
@@ -97,7 +101,7 @@ python C:\Users\Kenneth\Documents\GitHub\bert\run\_pretraining.py ^
 Pre-training should be run using data sets 1 & 2 over multiple rounds until the desired accuracy is attained. For more information on run\_pretraining.py, please consult the BERT documentation.
 
 
-## Code instruction embeddings
+### Code instruction embeddings
 
 In the folder 3\_code\_instruction\_embeddings, you will find:
 
@@ -113,12 +117,12 @@ To create the embedding files needed to train the Siamese network, do the follow
 For questions on editing batch\_embeddings\_from\_BERT.py, please consult the BERT documentation for extract\_features.py.
 
 
-## Similarity detection
+### Code file vector space representation and similarity detection
 
 In the folder 4a\_similarity\_detection, you will find two folders: train and test. Test is set up to validate the already trained Siamese model from the thesis. Train is set to train a new model of the Siamese network.
 
-### Train
-In this folder you will find the following:
+#### Similarity detection: Train
+In the train folder you will find the following:
 - TODO: link to embedding files needed to training the Siamese network (Data sets 5, 6, 7)
 - one folder containing the scripts needed to train a new model of the Siamese network.
 
@@ -130,8 +134,8 @@ Follow the instructions below to train a new model:
 4) edit line 13 of siamese\_train.py to include the path to the directory containing the unzipped training data
 5) run siamese\_train.py to train the model. The trained model is saved as Siamese\_RNN\_01.h5. This can be changed in line 82.
 
-### Test
-In this folder you will find the following:
+#### Similarity detection: Test
+In the test folder you will find the following:
 - TODO: link to embedding files needed to evaluate the Siamese network (Data sets 8, 9, 10)
 - one folder containing:
 	- the scripts needed to evaluate the accuracy of the already trained Siamese model from the thesis
@@ -147,8 +151,12 @@ Follow the instructions below to evaluate the accuracy of the Siamese model from
 6) run siamese\_evaluate.py to evaluate the model using the Keras evaluate function
 7) run siamese\_predict.py to evaluate the model using the Keras predict function
 
+Running siamese\_predict.py will produce the following output:
 
-## Fuzzy hashing comparison
+![Predict output screenshot](/img/Predict_Output.png)
+
+
+#### Fuzzy hashing comparison
 
 In the folder 4b\_fuzzy\_hashing\_comparison, you will find a zip file named fuzzy\_hash\_dataset.zip. It contains data sets 11, 12 & 13.
 
@@ -156,8 +164,13 @@ The thesis comparison was run using version 3.1\_2 of sdhash and version 2.14.1 
 
 The following commands were run from the folder containing the dataset to conduct the comparison:
 
-ssdeep -s \*.code \> database.ssd
-ssdeep -m database.ssd \*.code -s
+	ssdeep -s *.code > database.ssd
+	ssdeep -m database.ssd *.code -s
 
-sdhash \*.code \> code.sdbf
-sdhash --compare code.sdbf
+![SSDEEP output screenshot](/img/SSDEEP_screenshot.png)
+
+
+	sdhash *.code > code.sdbf
+	sdhash --compare code.sdbf
+
+![SDHASH output screenshot](/img/SDHASH_screenshot.png)
