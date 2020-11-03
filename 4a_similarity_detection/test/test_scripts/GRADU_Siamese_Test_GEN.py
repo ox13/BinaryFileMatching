@@ -8,18 +8,23 @@ import random
 #from keras.preprocessing.sequence import pad_sequences as pad 
 
 # PATH TO RASP DOCUMENT VECTOR FILES
-rasp_path = "C:\\..\\..\\20_rasp_EMBED_match_ess\\"
-rasp_no_match_path = "C:\\..\\..\\20_rasp_EMBED_no_match_ess\\"
+rasp_path = "E:\\Gradu\\DataSet\\Match\\MatchedFiles_json_essential\\Test\\20_rasp_EMBED_match_ess\\"
+rasp_no_match_path = "E:\\Gradu\\DataSet\\Match\\MatchedFiles_json_essential\\Test\\20_rasp_EMBED_no_match_ess\\"
 
 # PATH TO ARMHF DOCUMENT VECTOR FILES
-armhf_path = 'C:\\..\\..\\20_armhf_EMBED_match_ess\\'
+armhf_path = 'E:\\Gradu\\DataSet\\Match\\MatchedFiles_json_essential\\Test\\20_armhf_EMBED_match_ess\\'
 
 # path to JSON files
-json_path = "C:\\..\\..\\bin_jsons\\"
+json_path = "E:\\Gradu\\bin_jsons\\"
 
 match_counter = []
 for i in range(1, 21):
   match_counter.append(i)
+#random.shuffle(match_counter)
+#counter_plus = 0
+
+
+# based on code from https://raw.githubusercontent.com/anujshah1003/custom_data_generator/master/flowers_recognition/custom_dataloader.py
 
 
 class Config():
@@ -37,7 +42,7 @@ class BinaryFileDocvec(object):
     
     """
     Implements a data loader that reads tha data and creates a data generator 
-    which can be directly used to train the model
+    which can be directly used to train your model
     """
     
     def __init__(self,root_dir=None):     
@@ -47,7 +52,13 @@ class BinaryFileDocvec(object):
         
         """
         function to read a csv file and create a list of samples of format
+        [[image1_filename,label1], [image2_filename,label2],...].
         
+        Args:
+            csv_file - csv file containing data information
+            
+        Returns:
+            samples - a list of format [[image1_filename,label1], [image2_filename,label2],...]
         """
         # Read the csv file
         data = pd.read_csv(os.path.join(self.root_dir,'data_files',csv_file))
@@ -120,6 +131,7 @@ class BinaryFileDocvec(object):
     def data_generator(self,data,batch_size=10,shuffle=True):              
         """
         Yields the next training batch.
+        Suppose `samples` is an array [[image1_filename,label1], [image2_filename,label2],...].
         """
         num_samples = len(data)
         if shuffle:
@@ -142,6 +154,15 @@ class BinaryFileDocvec(object):
                     img_name = batch_sample[0]
                     img_name = img_name[0]
                     armhf_name, auto_label = self.match_coord(img_name)
+
+
+                    file1 = open("TestFilePairs.txt","a")
+
+                    #L = [img_name, armhf_name, str(auto_label)]
+                    file1.write(img_name+"\n")
+                    file1.write(armhf_name+"\n")
+                    file1.write(str(auto_label)+"\n")
+                    file1.write('=====================================\n')
                                      
                     img = jsonlines.open(img_name)
                     img2 = jsonlines.open(armhf_name)
@@ -159,11 +180,11 @@ class BinaryFileDocvec(object):
                 # Make sure they're numpy arrays (as opposed to lists)
                 X_base = np.array(X_base)
                 base_length = len(X_base)
-                X_base = X_base.reshape(base_length, 1, 768)
+                X_base = X_base.reshape(1, base_length, 768)
 
                 X_match = np.array(X_match)
                 match_length = len(X_match)
-                X_match = X_match.reshape(match_length, 1, 768)
+                X_match = X_match.reshape(1, match_length, 768)
 
                 # padding the files to be of equal number of time series
                 new_sents = [] 
@@ -181,8 +202,8 @@ class BinaryFileDocvec(object):
                         label.append([auto_label])
                         #label.append(label)
                     new_sents = np.array(new_sents)
-                    new_sents = new_sents.reshape((base_length - match_length), 1, 768)                    
-                    X_match = np.concatenate((X_match, new_sents), axis=0)
+                    new_sents = new_sents.reshape(1, (base_length - match_length), 768)                    
+                    X_match = np.concatenate((X_match, new_sents), axis=1)
                     label = np.array(label)
                     #change here also: label_array from label
                     #label = np.concatenate((label_array, label_pad), axis=0)
@@ -193,15 +214,54 @@ class BinaryFileDocvec(object):
                         label.append([auto_label])
                         #label.append(label)
                     new_sents = np.array(new_sents)
-                    new_sents = new_sents.reshape((match_length - base_length), 1, 768)
-                    X_base = np.concatenate((X_base, new_sents), axis=0)
+                    new_sents = new_sents.reshape(1, (match_length - base_length), 768)
+                    X_base = np.concatenate((X_base, new_sents), axis=1)
                     label = np.array(label)
                 else:
                     nothing = 0
        
                 # The generator-y part: yield the next training batch            
-                yield [X_base, X_match], label
+                yield [X_base, X_match], label[0]
     
+    
+if __name__=='__main__':
+
+   dataloader = BinaryFileDocvec(root_dir=r'E:\Gradu\DataSet\Match\MatchedFiles_json_essential\Test')
+   
+   train_data_path = 'testdata.csv'
+ 
+
+   train_samples = dataloader.load_samples(train_data_path)
+   
+
+   num_train_samples = len(train_samples) + 1
+   
+
+   print ('number of test samples: ', num_train_samples)
+   
+    
+   
+   # Create generator
+   batch_size = Config.batch_size
+   train_datagen = dataloader.data_generator(train_samples, batch_size=batch_size, shuffle=True)
+   
+   
+   
+   for k in range(2):
+       x, y = next(train_datagen)
+       # print(y)
+       #print ('base time_series: ', x[0].shape)#len(x[0]))
+    #    print ('match time_series: ', x[1].shape)#len(x[1]))
+    #    print ('label shape: ', y.shape) 
+       #print('label numer ',k+1,' of 80: ', y[1])
+       print('Type of X1: ', type(x[0]))
+       print ('Shape of X1: ', x[0].shape)
+       print('Type if X2: ', type(x[1]))
+       print ('Shape of X2: ', x[1].shape)
+       print('Type if Y: ', type(y))
+       print ('Shape of Y: ', y.shape)
+       print('==============================')
+       
 
 
 
