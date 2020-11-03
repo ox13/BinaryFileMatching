@@ -15,9 +15,38 @@ The scripts included in this repository require the installation of the followin
 These scripts were tested to run on a Windows 10 installation with tensorflow-gpu version 2.0.0 and Keras version 2.3.1. 
 
 
-## Thesis artefact
+## Using the thesis artefact
 
-The thesis artefact consists of four different stages  as noted in the image below.
+The thesis artefact produced two trained deep learning models that can be used to match the stripped binary code sections of executables compiled for the ARM ISA. The models were trained on the code sections of armhf executables from the Debian repository, as well as those from the Raspbian project. Usage of the models is outlined in the image below.
+
+![Outline of artefact usage](/img/usage.png)
+
+### Step 1 
+Prepare the binary file you wish to compare with your existing library of files by doing the following:
+- Use only the stripped code sections of the armhf executable
+- Turn the file into text using the bin2tx.bulk.py script
+- Create shards of your file using the following command edited for your environment:
+
+	python C:\Users\Kenneth\Documents\GitHub\bert\shard\_file.py ^
+	  --input-file "C:\gradu2\armhf.txt" ^
+	  --shards-directory "C:\gradu2\shards" ^
+	  --shard-size
+
+Then used the output with the pretrained BERT model model.cpkt-100000 (TODO: INSERT LINK TO FILE HERE) to create an embedding file. This is accomplished by using the batch\_embeddings\_from\_BERT.py  script edited for your environment. In particular, note the paths on lines 7 and 12 as noted in the script comments. For more information  on editing batch\_embeddings\_from\_BERT.py, please consult the BERT documentation for extract\_features.py.
+
+### Step 2
+With the embedding file from step one as input, use the trained model Siamese \_RNN\_15.h5 to predict a match with your library of known files. These should already have been prepared as embedding files using the methods outlined in step 1 above. 
+
+If you do not have a library of files available, the data set of embedding files used in the thesis artefact can be found at (TODO: INSERT LINK TO DATA HERE). All files names contain a hash the is consistent as the code sections are transformed to text and then to embeddings. The script hash\_match.py found in the 0\_tools directory of this repository can be used to find the name of the software package from which the code section and subsequent embedding file was derived.
+
+With your library in place, two scripts are used to predict a match:  GRADU\_Siamese\_Test\_GEN.py, which feeds data to the trained deep learning model, and siamese\_predict.py, which calls the trained model and makes a prediction on the data fed to it. These can both be found in the test\_scripts directory of the test directory in the 4a \_similarity \_detection directory of this repository. Both need to be edited for your environment. Edit lines 11, 12, 15, and 18 of GRADU\_Siamese\_Test\_GEN.py to include the correct paths for your environment. Edit line 13 of siamese\_predict.py to include the path to the directory containing your data. Once edited, run siamese\_predict.py.
+
+The output will be two files. One titled Predictions.txt that will contain the predictions and one titled TestFilePairs.txt that will contain the files that were compared. The order of these two files will align and you can see the prediction for each file pair. Anything ≥0.5 is predicted to be a match. In the limited testing conducted as part of the thesis artefact on the test data set, the trained model achieved an accuracy rate of 83%. 
+
+
+## Researching the thesis artefact
+
+The information below is for those researching the thesis artefact and provides additional information on how it was developed and tested. The thesis artefact itself was developed in four different stages as noted in the image below.
 
 ![Thesis artefact stages](/img/artefact_stages.png)
 
@@ -33,8 +62,6 @@ Below is a table of the various datasets used in the thesis artefact. These are 
 ## Thesis artefact validation
 
 If you want to quickly validate the similarity detection portion of the artefact, please focus on the ‘Similarity detection: Test’ and ‘Fuzzy hashing comparison’ sections below. These sections contain commands and associated screen shots of the output.
-
-
 
 ## Thesis stages
 
@@ -151,9 +178,8 @@ Follow the instructions below to evaluate the accuracy of the Siamese model from
 6) run siamese\_evaluate.py to evaluate the model using the Keras evaluate function
 7) run siamese\_predict.py to evaluate the model using the Keras predict function
 
-Running siamese\_predict.py will produce the following output:
+Running siamese\_predict.py will output two files. One titled Predictions.txt that will contain the predictions and one titled TestFilePairs.txt that will contain the files that were compared. The order of these two files will align and you can see the prediction for each file pair. Anything ≥0.5 is predicted to be a match. In the limited testing conducted as part of the thesis artefact on the test data set, the trained model achieved an accuracy rate of 83%. 
 
-![Predict output screenshot](/img/Predict_Output.png)
 
 
 #### Fuzzy hashing comparison
