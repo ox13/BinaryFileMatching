@@ -15,6 +15,11 @@ The scripts included in this repository require the installation of the followin
 These scripts were tested to run on a Windows 10 installation with tensorflow-gpu version 2.0.0 and Keras version 2.3.1. 
 
 
+## Datasets
+
+Datasets and the pre-trained BERT model for binary files can be found at http://urn.fi/urn:nbn:fi:att:ffaa2ff0-fdd6-4d9e-831a-99f7a5c2cb59.
+
+
 ## Using the thesis artefact
 
 The thesis artefact produced two trained deep learning models that can be used to match the stripped binary code sections of executables compiled for the ARM ISA. The models were trained on the code sections of armhf executables from the Debian repository, as well as those from the Raspbian project. Usage of the models is outlined in the image below.
@@ -32,12 +37,12 @@ Prepare the binary file you wish to compare with your existing library of files 
 	  --shards-directory "C:\gradu2\shards" ^
 	  --shard-size
 
-Then used the output with the pretrained BERT model model.cpkt-100000 (TODO: INSERT LINK TO FILE HERE) to create an embedding file. This is accomplished by using the batch\_embeddings\_from\_BERT.py  script edited for your environment. In particular, note the paths on lines 7 and 12 as noted in the script comments. For more information  on editing batch\_embeddings\_from\_BERT.py, please consult the BERT documentation for extract\_features.py.
+Then used the output with the pretrained BERT model model.cpkt-100000 (which can be found in the pre_trained_BERT folder of the datasets) to create an embedding file. This is accomplished by using the batch\_embeddings\_from\_BERT.py  script edited for your environment. In particular, note the paths on lines 7 and 12 as noted in the script comments. For more information  on editing batch\_embeddings\_from\_BERT.py, please consult the BERT documentation for extract\_features.py.
 
 ### Step 2
-With the embedding file from step one as input, use the trained model Siamese \_RNN\_15.h5 to predict a match with your library of known files. These should already have been prepared as embedding files using the methods outlined in step 1 above. 
+With the embedding file from step one as input, use the trained model Siamese\_RNN\_15.h5 to predict a match with your library of known files. These should already have been prepared as embedding files using the methods outlined in step 1 above. 
 
-If you do not have a library of files available, the data set of embedding files used in the thesis artefact can be found at (TODO: INSERT LINK TO DATA HERE). All files names contain a hash the is consistent as the code sections are transformed to text and then to embeddings. The script hash\_match.py found in the 0\_tools directory of this repository can be used to find the name of the software package from which the code section and subsequent embedding file was derived.
+If you do not have a library of files available, the data set of embedding files used in the thesis artefact can be found in the test_data folder from the datasets. All files names contain a hash the is consistent as the code sections are transformed to text and then to embeddings. The script hash\_match.py found in the 0\_tools directory of this repository can be used to find the name of the software package from which the code section and subsequent embedding file was derived.
 
 With your library in place, two scripts are used to predict a match:  GRADU\_Siamese\_Test\_GEN.py, which feeds data to the trained deep learning model, and siamese\_predict.py, which calls the trained model and makes a prediction on the data fed to it. These can both be found in the test\_scripts directory of the test directory in the 4a \_similarity \_detection directory of this repository. Both need to be edited for your environment. Edit lines 11, 12, 15, and 18 of GRADU\_Siamese\_Test\_GEN.py to include the correct paths for your environment. Edit line 13 of siamese\_predict.py to include the path to the directory containing your data. Once edited, run siamese\_predict.py.
 
@@ -69,10 +74,11 @@ If you want to quickly validate the similarity detection portion of the artefact
 
 In the folder 1\_dataset\_preparation, you will find the following:
 
-- TODO: a link to data sets 1 & 2
 - bin\_vocab\_builder.py
 - bin2txt.bulk.py
 - gradu\_data\_prep.py
+
+- TODO: The data needed for these scripts (data sets 1 & 2) can be found...
 
 To prepare binary data to pre-train BERT, do the following:
 
@@ -105,9 +111,7 @@ For more information on create\_pretraining\_data.py, please consult the BERT do
 
 ### ISA model learning
 
-In the folder 2\_ISA\_model\_learning, you will find:
-
-- TODO: a link to BERT\_train\_data
+Data used to pre-train BERT can be found in the BERT_train_data folder of the datasets.
 
 To pre-train BERT, use the following command customized for the downloaded BERT\_train\_data in your environment:
 
@@ -133,7 +137,8 @@ Pre-training should be run using data sets 1 & 2 over multiple rounds until the 
 In the folder 3\_code\_instruction\_embeddings, you will find:
 
 - batch\_embeddings\_from\_BERT.py
-- TODO: link to pre\_trained\_BERT.zip
+
+The pre-trained BERT model can be found in the pre_trained_BERT folder in the datasets.
 
 To create the embedding files needed to train the Siamese network, do the following:
 
@@ -150,8 +155,11 @@ In the folder 4a\_similarity\_detection, you will find two folders: train and te
 
 #### Similarity detection: Train
 In the train folder you will find the following:
-- TODO: link to embedding files needed to training the Siamese network (Data sets 5, 6, 7)
+
 - one folder containing the scripts needed to train a new model of the Siamese network.
+
+
+- TODO: the embedding files needed to training the Siamese network (Data sets 5, 6, 7) can be found...
 
 Follow the instructions below to train a new model:
 
@@ -163,10 +171,12 @@ Follow the instructions below to train a new model:
 
 #### Similarity detection: Test
 In the test folder you will find the following:
-- TODO: link to embedding files needed to evaluate the Siamese network (Data sets 8, 9, 10)
+
 - one folder containing:
 	- the scripts needed to evaluate the accuracy of the already trained Siamese model from the thesis
 	- the trained model named Siamese\_RNN\_13.h5
+
+The embedding files needed to evaluate the Siamese network (Data sets 8, 9, 10) can be found in the test_data folder of the datasets.
 
 Follow the instructions below to evaluate the accuracy of the Siamese model from the thesis:
 
